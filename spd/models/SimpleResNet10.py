@@ -12,7 +12,7 @@ def SparseResNet(dimension, nInputPlanes, layers):
     """
     nPlanes = nInputPlanes
     m = scn.Sequential()
-    
+
     def residual(nIn, nOut, stride):
         if stride > 1:
             return scn.Convolution(dimension, nIn, nOut, 2, stride, False)
@@ -33,7 +33,7 @@ def SparseResNet(dimension, nInputPlanes, layers):
                 tab_seq.add(scn.BatchNormReLU(n))
                 tab_seq.add(scn.SubmanifoldConvolution(dimension,n,n,3,False))
                 tab.add(tab_seq)
-                tab.add(residual(nPlanes,n,stride))                    
+                tab.add(residual(nPlanes,n,stride))
                 m.add(tab)
             else:
                 tab=scn.ConcatTable()
@@ -49,9 +49,9 @@ def SparseResNet(dimension, nInputPlanes, layers):
             m.add(scn.AddTable())
     m.add(scn.BatchNormReLU(nPlanes))
     return m
-                    
+
 class SimpleResNet10(torch.nn.Module):
-    
+
     def __init__(self,flags):
         torch.nn.Module.__init__(self)
         import sparseconvnet as scn
@@ -71,11 +71,12 @@ class SimpleResNet10(torch.nn.Module):
                                                      [num_filter*8,2,2]]))
         net.add(scn.Convolution(dimension, num_filter*8, num_filter*16, 3, 1, False))
         net.add(scn.BatchNormReLU(num_filter*16))
+        net.add(scn.AveragePooling(dimension, 6, 6))
         net.add(scn.SparseToDense(dimension,num_filter*16))
-        net.add(torch.nn.AvgPool3d(6))
+        # net.add(torch.nn.AvgPool3d(6))
         self._net   = net
         self.linear = torch.nn.Linear(num_filter*16,num_class)
-        
+
     def forward(self, blob):
         voxels = blob[:,0:4]
         features = blob[:,4:]
@@ -92,7 +93,7 @@ if __name__ == '__main__':
     flags.NUM_CLASS=2
     flags.SPATIAL_SIZE=128
     flags.BASE_NUM_FILTERS=16
-    
+
     import numpy as np
     voxels   = np.zeros(shape=[200,4],dtype=np.float32)
     features = np.zeros(shape=[200,1],dtype=np.float32)

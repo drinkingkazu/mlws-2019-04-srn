@@ -63,9 +63,9 @@ class trainval(object):
                 if key not in res_combined:
                     res_combined[key] = res[key]
                 else:
-                    res_combined[key].extend(res[key])            
+                    res_combined[key].extend(res[key])
             miniblob = {'data':[],'label':[],'index':[]}
-            
+
         # Average loss and acc over all the events in this batch
         res_combined['accuracy'] = np.array(res_combined['accuracy']).mean()
         res_combined['loss'    ] = np.array(res_combined['loss'    ]).mean()
@@ -123,7 +123,9 @@ class trainval(object):
             self._net.cuda()
             self._criterion.cuda()
 
-        self._optimizer = torch.optim.Adam(self._net.parameters(), lr=self._flags.LEARNING_RATE)
+        self._optimizer = torch.optim.Adam(self._net.parameters(),
+                                           lr=self._flags.LEARNING_RATE,
+                                           weight_decay=0.001)
         self._softmax = torch.nn.Softmax(dim=0)
 
         iteration = 0
